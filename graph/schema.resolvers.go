@@ -6,43 +6,44 @@ package graph
 
 import (
 	"context"
+	"crypto/rand"
+	"fmt"
+	"math/big"
 	"my_gql_server/graph/model"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	return &model.Todo{
-		ID:   "TODO-3",
+	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
+	todo := &model.Todo{
 		Text: input.Text,
-		User: &model.User{
-			ID:   input.UserID,
-			Name: "name",
-		},
-	}, nil
+		ID:   fmt.Sprintf("T%d", randNumber),
+		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
+	}
+	r.todos = append(r.todos, todo)
+	return todo, nil
+}
+
+// CreateDevice is the resolver for the createDevice field.
+func (r *mutationResolver) CreateDevice(ctx context.Context, name string, userID string) (*model.Device, error) {
+	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
+	device := &model.Device{
+		Name: name,
+		ID:   fmt.Sprintf("D%d", randNumber),
+		User: &model.User{ID: userID, Name: "user " + userID},
+	}
+	r.devices = append(r.devices, device)
+	return device, nil
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	return []*model.Todo{
-		{
-			ID:   "TODO-1",
-			Text: "My Todo 1",
-			User: &model.User{
-				ID:   "User-1",
-				Name: "hsaki",
-			},
-			Done: true,
-		},
-		{
-			ID:   "TODO-2",
-			Text: "My Todo 2",
-			User: &model.User{
-				ID:   "User-1",
-				Name: "hsaki",
-			},
-			Done: false,
-		},
-	}, nil
+	return r.todos, nil
+}
+
+// Devices is the resolver for the devices field.
+func (r *queryResolver) Devices(ctx context.Context) ([]*model.Device, error) {
+	return r.devices, nil
 }
 
 // Mutation returns MutationResolver implementation.
